@@ -5,11 +5,13 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function App() {
   const titleOpacity = useSharedValue(0);
   const titleScale = useSharedValue(0.5);
   const startButtonOpacity = useSharedValue(0);
+  const lightIconButtonOpacity = useSharedValue(0);
 
   const titleAnimationStyle = useAnimatedStyle(() => {
     return {
@@ -24,12 +26,19 @@ export default function App() {
     };
   });
 
+  const lightIconButtonAnimationStyle = useAnimatedStyle(() => {
+    return {
+      opacity: lightIconButtonOpacity.value,
+    };
+  });
+
   useEffect(() => {
     titleOpacity.value = withTiming(1, { duration: 2000 });
     titleScale.value = withTiming(1, { duration: 2000 });
 
     setTimeout(() => {
       startButtonOpacity.value = withTiming(1, { duration: 1000 });
+      lightIconButtonOpacity.value = withTiming(1, { duration: 1000 });
     }, 2000);
   }, []);
 
@@ -43,6 +52,13 @@ export default function App() {
       >
         <TouchableOpacity style={styles.startButton}>
           <Text style={styles.startButtonText}>시작하기</Text>
+        </TouchableOpacity>
+      </Animated.View>
+      <Animated.View
+        style={[styles.lightButtonContainer, lightIconButtonAnimationStyle]}
+      >
+        <TouchableOpacity>
+          <Ionicons name="bulb" size={32} color="#FFCC02" />
         </TouchableOpacity>
       </Animated.View>
     </View>
@@ -73,5 +89,10 @@ const styles = StyleSheet.create({
     color: 'black',
     fontSize: 25,
     fontWeight: 'bold',
+  },
+  lightButtonContainer: {
+    position: 'absolute',
+    left: 35,
+    bottom: 50,
   },
 });
