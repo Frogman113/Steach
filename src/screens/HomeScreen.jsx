@@ -7,7 +7,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 
-export default function App() {
+export default function HomeScreen({ navigation }) {
   const titleOpacity = useSharedValue(0);
   const titleScale = useSharedValue(0.5);
   const startButtonOpacity = useSharedValue(0);
@@ -50,14 +50,17 @@ export default function App() {
       <Animated.View
         style={[styles.startButtonContainer, startButtonAnimationStyle]}
       >
-        <TouchableOpacity style={styles.startButton}>
+        <TouchableOpacity
+          style={styles.startButton}
+          onPress={() => navigation.navigate('Start')}
+        >
           <Text style={styles.startButtonText}>시작하기</Text>
         </TouchableOpacity>
       </Animated.View>
       <Animated.View
         style={[styles.lightButtonContainer, lightIconButtonAnimationStyle]}
       >
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('LightIcon')}>
           <Ionicons name="bulb" size={32} color="#FFCC02" />
         </TouchableOpacity>
       </Animated.View>
