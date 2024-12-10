@@ -1,10 +1,16 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { useState } from 'react';
+import { View, StyleSheet, TouchableOpacity } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 export default function StartButtonScreen() {
+  const [isRequire, setIsRequrie] = useState(false);
+
   return (
     <View style={styles.StartButtonContainer}>
-      <Text style={styles.StartButtonContainerText}>사용 화면</Text>
+      <TouchableOpacity>
+        <MaterialIcons name="multitrack-audio" size={100} color="black" />
+      </TouchableOpacity>
     </View>
   );
 }
