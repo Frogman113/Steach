@@ -10,6 +10,4 @@ app.post('/', (req, res) => {
   res.send('Got a POST request');
 });
 
-app.listen(port, () => {
-  console.log('Express 서버가 포트 ' + port + '에서 작동 중입니다.');
-});
+app.listen(port, () => {});
