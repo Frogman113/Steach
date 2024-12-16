@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   StyleSheet,
@@ -8,27 +8,52 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
-import { CLOVA_SECRET_KEY } from '@env';
 
 export default function StartButtonScreen() {
   const [recording, setRecording] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [convertedText, setconvertedText] = useState('');
+  const [convertedText, setConvertedText] = useState('');
   const [loading, setLoading] = useState(false);
+  const ws = useRef(null);
 
   useEffect(() => {
+    ws.current = new WebSocket('ws://192.168.31.68:3000');
+
+    ws.current.onopen = () => {};
+
+    ws.current.onmessage = (event) => {
+      try {
+        const response = JSON.parse(event.data);
+        if (response.text) {
+          setConvertedText(response.text);
+        } else if (response.error) {
+          alert('텍스트 변환 실패');
+        }
+      } catch (error) {
+        alert('텍스트 변환 오류 ', error);
+      }
+      setLoading(false);
+    };
+
+    ws.current.onerror = () => {
+      setLoading(false);
+    };
+
     return () => {
       if (recording) {
         recording.stopAndUnloadAsync();
       }
+      if (ws.current) {
+        ws.current.close();
+      }
     };
-  }, [recording]);
+  }, []);
 
   const startRecording = async () => {
     try {
       const permissionCheck = await Audio.requestPermissionsAsync();
       if (permissionCheck.status !== 'granted') {
-        alert('마이크 권한이 필요합니다.');
+        alert('마이크 권한이 필요');
         return;
       }
 
@@ -59,7 +84,7 @@ export default function StartButtonScreen() {
       setRecording(createRecording);
       setIsRecording(true);
     } catch (error) {
-      alert('녹음을 시작할 수 없습니다: ' + error.message);
+      alert('녹음 시작 불가 ', error);
     }
   };
 
@@ -95,32 +120,16 @@ export default function StartButtonScreen() {
     try {
       setLoading(true);
 
+      if (!ws.current || ws.current.readyState !== WebSocket.OPEN) {
+        throw new Error('WebSocket 미연결');
+      }
+
       const audioresponse = await fetch(audioUri);
       const audioBinaryData = await audioresponse.arrayBuffer();
 
-      const clovaApiResponse = await fetch(
-        'https://clovaspeech-gw.ncloud.com/recog/v1/stt?lang=Kor',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/octet-stream',
-            'X-CLOVASPEECH-API-KEY': CLOVA_SECRET_KEY,
-            'X-CLOVASPEECH-LANGUAGE': 'ko',
-          },
-          body: audioBinaryData,
-        },
-      );
-
-      const convertedTextResult = await clovaApiResponse.json();
-
-      if (clovaApiResponse.ok && convertedTextResult.text) {
-        setconvertedText(convertedTextResult.text);
-      } else {
-        alert('텍스트 변환 실패');
-      }
+      ws.current.send(audioBinaryData);
     } catch (error) {
-      alert('텍스트 변환 중 오류: ', error.message);
-    } finally {
+      alert('텍스트 변환 중 오류 ', error);
       setLoading(false);
     }
   };
@@ -145,13 +154,13 @@ export default function StartButtonScreen() {
 const styles = StyleSheet.create({
   startButtonContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: 'white',
     alignItems: 'center',
     justifyContent: 'center',
   },
   convertedTextShow: {
     marginTop: 20,
     fontSize: 18,
-    color: '#333',
+    color: 'black',
   },
 });
