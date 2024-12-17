@@ -1,6 +1,7 @@
 const express = require('express');
 const WebSocket = require('ws');
 const fetch = require('node-fetch');
+const OpenAI = require('openai');
 require('dotenv').config();
 
 const app = express();
@@ -9,6 +10,29 @@ const port = 3000;
 const server = app.listen(port, () => {});
 
 const wss = new WebSocket.Server({ server });
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+async function openaiResponse(text) {
+  try {
+    const response = await openai.chat.completions.create({
+      model: 'gpt-3.5-turbo',
+      messages: [
+        {
+          role: 'user',
+          content: text,
+        },
+      ],
+      temperature: 0.7,
+    });
+
+    return response.choices[0].message.content;
+  } catch (error) {
+    throw new Error('오픈에이아이 오류 발생 ', error);
+  }
+}
 
 wss.on('connection', (ws) => {
   ws.on('message', async (data) => {
