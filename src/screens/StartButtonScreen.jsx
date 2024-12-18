@@ -12,7 +12,8 @@ import { Audio } from 'expo-av';
 export default function StartButtonScreen() {
   const [recording, setRecording] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [convertedText, setConvertedText] = useState('');
+  const [clovaSttText, setClovaSttText] = useState('');
+  const [openaiContext, setOpenaiContext] = useState('');
   const [loading, setLoading] = useState(false);
   const ws = useRef(null);
 
@@ -24,13 +25,14 @@ export default function StartButtonScreen() {
     ws.current.onmessage = (event) => {
       try {
         const response = JSON.parse(event.data);
-        if (response.text) {
-          setConvertedText(response.text);
+        if (response.clovaApiResult && response.openaiApiResult) {
+          setClovaSttText(response.clovaApiResult);
+          setOpenaiContext(response.openaiApiResult);
         } else if (response.error) {
           alert('텍스트 변환 실패');
         }
       } catch (error) {
-        alert('텍스트 변환 오류 ', error);
+        alert('텍스트 변환 오류');
       }
       setLoading(false);
     };
@@ -84,7 +86,7 @@ export default function StartButtonScreen() {
       setRecording(createRecording);
       setIsRecording(true);
     } catch (error) {
-      alert('녹음 시작 불가 ', error);
+      alert('녹음 시작 불가');
     }
   };
 
@@ -104,7 +106,7 @@ export default function StartButtonScreen() {
         convertSpeechToText(audioUri);
       }
     } catch (error) {
-      alert('녹음 중지 불가능');
+      alert('녹음 중지 불가');
     }
   };
 
@@ -129,7 +131,7 @@ export default function StartButtonScreen() {
 
       ws.current.send(audioBinaryData);
     } catch (error) {
-      alert('텍스트 변환 중 오류 ', error);
+      alert('텍스트 변환 중 오류');
       setLoading(false);
     }
   };
@@ -144,8 +146,17 @@ export default function StartButtonScreen() {
         />
       </TouchableOpacity>
       {loading && <ActivityIndicator size="large" color="black" />}
-      {convertedText ? (
-        <Text style={styles.convertedTextShow}>{convertedText}</Text>
+      {clovaSttText ? (
+        <View style={styles.textContainer}>
+          <Text style={styles.label}>음성 인식 결과</Text>
+          <Text style={styles.resultText}>{clovaSttText}</Text>
+        </View>
+      ) : null}
+      {openaiContext ? (
+        <View style={styles.textContainer}>
+          <Text style={styles.label}>AI 답변</Text>
+          <Text style={styles.resultText}>{openaiContext}</Text>
+        </View>
       ) : null}
     </View>
   );
@@ -158,9 +169,23 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  convertedTextShow: {
-    marginTop: 20,
-    fontSize: 18,
+  textContainer: {
+    marginTop: 30,
+    fontSize: 16,
+    marginBottom: 5,
     color: 'black',
+  },
+  label: {
+    fontSize: 19,
+    fontWeight: 'bold',
+    marginBottom: 5,
+    textAlign: 'center',
+    color: 'orange',
+  },
+  resultText: {
+    fontSize: 16,
+    color: 'black',
+    textAlign: 'center',
+    marginHorizontal: 20,
   },
 });
