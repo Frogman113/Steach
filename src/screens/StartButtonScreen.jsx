@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
+import * as Speech from 'expo-speech';
 
 export default function StartButtonScreen() {
   const [recording, setRecording] = useState(null);
@@ -28,6 +29,12 @@ export default function StartButtonScreen() {
         if (response.clovaApiResult && response.openaiApiResult) {
           setClovaSttText(response.clovaApiResult);
           setOpenaiContext(response.openaiApiResult);
+
+          Speech.speak(response.openaiApiResult, {
+            language: 'ko-KR',
+            pitch: 1.0,
+            rate: 1.0,
+          });
         } else if (response.error) {
           alert('텍스트 변환 실패');
         }
