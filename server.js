@@ -15,9 +15,9 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-async function openaiResponse(text) {
+async function openaiApi(text) {
   try {
-    const response = await openai.chat.completions.create({
+    const openAiResponse = await openai.chat.completions.create({
       model: 'gpt-3.5-turbo',
       messages: [
         {
@@ -28,9 +28,9 @@ async function openaiResponse(text) {
       temperature: 0.7,
     });
 
-    return response.choices[0].message.content;
+    return openAiResponse.choices[0].message.content;
   } catch (error) {
-    throw new Error('오픈에이아이 오류 발생 ', error);
+    throw new Error('openAi 오류 발생 ', error.message);
   }
 }
 
@@ -51,14 +51,29 @@ wss.on('connection', (ws) => {
           },
         );
 
-        const apiResult = await clovaResponse.json();
+        const clovaApiResult = await clovaResponse.json();
 
-        ws.send(JSON.stringify(apiResult));
+        if (clovaApiResult.text) {
+          const openaiApiResult = await openaiApi(clovaApiResult.text);
+
+          ws.send(
+            JSON.stringify({
+              clovaApiResult: clovaApiResult.text,
+              openaiApiResult: openaiApiResult,
+            }),
+          );
+        } else {
+          ws.send(
+            JSON.stringify({
+              error: 'openAi 텍스트 전달 실패',
+            }),
+          );
+        }
       }
     } catch (error) {
       ws.send(
         JSON.stringify({
-          error: error.message,
+          error: 'openAi API 오류' + error.message,
         }),
       );
     }
