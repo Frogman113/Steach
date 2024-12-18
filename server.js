@@ -25,12 +25,12 @@ async function openaiApi(text) {
           content: text,
         },
       ],
-      temperature: 0.7,
+      temperature: 1,
     });
 
     return openAiResponse.choices[0].message.content;
   } catch (error) {
-    throw new Error('openAi 오류 발생 ', error.message);
+    throw new Error('openAi 오류 발생 ' + error.message);
   }
 }
 
