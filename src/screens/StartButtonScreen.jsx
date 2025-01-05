@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
+import { WS_SERVER } from '@env';
 
 export default function StartButtonScreen() {
   const [recording, setRecording] = useState(null);
@@ -18,7 +19,7 @@ export default function StartButtonScreen() {
   const ws = useRef(null);
 
   useEffect(() => {
-    ws.current = new WebSocket('ws://192.168.31.68:3000');
+    ws.current = new WebSocket(WS_SERVER);
 
     ws.current.onopen = () => {};
 
@@ -28,6 +29,10 @@ export default function StartButtonScreen() {
         if (response.clovaApiResult && response.openaiApiResult) {
           setClovaSttText(response.clovaApiResult);
           setOpenaiContext(response.openaiApiResult);
+
+          if (response.audioData) {
+            voicePlayResponse(response.audioData);
+          }
         } else if (response.error) {
           alert('텍스트 변환 실패');
         }
@@ -133,6 +138,17 @@ export default function StartButtonScreen() {
     } catch (error) {
       alert('텍스트 변환 중 오류');
       setLoading(false);
+    }
+  };
+
+  const voicePlayResponse = async (base64Audio) => {
+    try {
+      const voiceAudioUri = `data:audio/mp3;base64,${base64Audio}`;
+      const voiceSound = new Audio.Sound();
+      await voiceSound.loadAsync({ uri: voiceAudioUri });
+      await voiceSound.playAsync();
+    } catch (error) {
+      alert('음성 재생 오류');
     }
   };
 

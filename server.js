@@ -34,6 +34,20 @@ async function openaiApi(text) {
   }
 }
 
+async function openaiApiTts(text) {
+  try {
+    const tts = await openai.audio.speech.create({
+      model: 'tts-1',
+      voice: 'shimmer',
+      input: text,
+    });
+    const buffer = Buffer.from(await tts.arrayBuffer());
+    return buffer;
+  } catch (error) {
+    throw new Error('openAi 텍스트 음성변환 실패' + error.message);
+  }
+}
+
 wss.on('connection', (ws) => {
   ws.on('message', async (data) => {
     try {
@@ -55,11 +69,13 @@ wss.on('connection', (ws) => {
 
         if (clovaApiResult.text) {
           const openaiApiResult = await openaiApi(clovaApiResult.text);
+          const voiceAPiResult = await openaiApiTts(openaiApiResult);
 
           ws.send(
             JSON.stringify({
               clovaApiResult: clovaApiResult.text,
               openaiApiResult: openaiApiResult,
+              audioData: voiceAPiResult.toString('base64'),
             }),
           );
         } else {
