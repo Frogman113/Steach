@@ -42,7 +42,7 @@ export default function CustomerSetupScreen({ navigation }) {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>고객 정보 설정</Text>
+        <Text style={styles.title}>고객 카드 설정</Text>
         <TextInput
           style={styles.input}
           placeholder="영업 분야 (예: 자동차, 가전제품)"
@@ -115,7 +115,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F5F5F5',
   },
   button: {
-    backgroundColor: '#0000FF',
+    backgroundColor: '#007AFF',
     paddingVertical: 12,
     paddingHorizontal: 25,
     borderRadius: 8,

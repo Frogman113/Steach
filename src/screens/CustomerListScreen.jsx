@@ -87,7 +87,7 @@ export default function CustomerListScreen({ navigation, route }) {
 
         <View style={styles.actionFooter}>
           <TouchableOpacity style={styles.addButton} onPress={addNewCustomer}>
-            <Text style={styles.addButtonText}>새 고객 정보 추가</Text>
+            <Text style={styles.addButtonText}>고객 카드 추가</Text>
           </TouchableOpacity>
         </View>
       </View>
