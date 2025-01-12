@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import useCustomerStore from '../stores/CustomerStore';
 
 export default function CustomerListScreen({ navigation, route }) {
   const { customerCards, addCustomer } = useCustomerStore();
+  const [selectedCardId, setSelectedCardId] = useState(null);
 
   useEffect(() => {
     if (route.params?.newCustomer) {
@@ -18,6 +19,10 @@ export default function CustomerListScreen({ navigation, route }) {
       navigation.setParams({ newCustomer: null });
     }
   }, [route.params?.newCustomer]);
+
+  const cardPressAction = (cardId) => {
+    setSelectedCardId(selectedCardId === cardId ? null : cardId);
+  };
 
   const addNewCustomer = () => {
     navigation.navigate('CustomerSetup');
@@ -27,29 +32,60 @@ export default function CustomerListScreen({ navigation, route }) {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>고객 정보 카드</Text>
-        <View style={styles.content}>
-          <ScrollView style={styles.customerCardList}>
-            {customerCards.map((card) => (
-              <View key={card.id} style={styles.customerCard}>
-                <Text style={styles.customerCardTitle}>{card.salesField}</Text>
-                <View style={styles.customerCardContent}>
-                  <Text style={styles.customerCardText}>
-                    연령대: {card.customerDetails.age}
-                  </Text>
-                  <Text style={styles.customerCardText}>
-                    구매 목적: {card.customerDetails.purpose}
-                  </Text>
-                  <Text style={styles.customerCardText}>
-                    예산: {card.customerDetails.budget}
-                  </Text>
-                  <Text style={styles.customerCardText}>
-                    선호 스타일: {card.customerDetails.preference}
-                  </Text>
-                </View>
+        <ScrollView
+          style={styles.customerCardList}
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {customerCards.map((card) => (
+            <TouchableOpacity
+              key={card.id}
+              style={styles.customerCard}
+              onPress={() => cardPressAction(card.id)}
+            >
+              <Text style={styles.customerCardTitle}>{card.salesField}</Text>
+              <View style={styles.customerCardContent}>
+                <Text style={styles.customerCardText}>
+                  연령대: {card.customerDetails.age}
+                </Text>
+                <Text style={styles.customerCardText}>
+                  구매 목적: {card.customerDetails.purpose}
+                </Text>
+                <Text style={styles.customerCardText}>
+                  예산: {card.customerDetails.budget}
+                </Text>
+                <Text style={styles.customerCardText}>
+                  선호 스타일: {card.customerDetails.preference}
+                </Text>
               </View>
-            ))}
-          </ScrollView>
 
+              {selectedCardId === card.id && (
+                <View style={styles.cardTouchActions}>
+                  <TouchableOpacity
+                    style={[
+                      styles.touchActionButton,
+                      styles.deleteActionButton,
+                    ]}
+                  >
+                    <Text style={styles.actionButtonText}>삭제</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.touchActionButton, styles.editActionButton]}
+                  >
+                    <Text style={styles.actionButtonText}>정보 수정</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.touchActionButton, styles.startActionButton]}
+                  >
+                    <Text style={styles.actionButtonText}>상담 시작</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        <View style={styles.actionFooter}>
           <TouchableOpacity style={styles.addButton} onPress={addNewCustomer}>
             <Text style={styles.addButtonText}>새 고객 정보 추가</Text>
           </TouchableOpacity>
@@ -66,7 +102,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 20,
   },
   title: {
     fontSize: 24,
@@ -75,8 +111,9 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
-  content: {
-    flex: 1,
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
   },
   customerCardList: {
     flex: 1,
@@ -106,11 +143,46 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666666',
   },
+  cardTouchActions: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#EEEEEE',
+  },
+  touchActionButton: {
+    flex: 1,
+    paddingVertical: 8,
+    marginHorizontal: 4,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  deleteActionButton: {
+    backgroundColor: '#FF3B30',
+  },
+  editActionButton: {
+    backgroundColor: '#007AFF',
+  },
+  startActionButton: {
+    backgroundColor: '#34C759',
+  },
+  actionButtonText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  actionFooter: {
+    backgroundColor: '#F5F5F5',
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
   addButton: {
-    backgroundColor: '#0000FF',
+    backgroundColor: '#007AFF',
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
+    width: '100%',
   },
   addButtonText: {
     color: '#FFFFFF',
