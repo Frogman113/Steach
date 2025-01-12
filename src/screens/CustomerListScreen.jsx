@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -8,19 +8,24 @@ import {
   SafeAreaView,
 } from 'react-native';
 
-export default function CustomerListScreen({ navigation }) {
-  const [customerCards, setCustomerCards] = useState([
-    {
-      id: '1',
-      salesField: '가전 영업',
-      customerDetails: {
-        age: '40대',
-        purpose: '이사',
-        budget: '1000만원',
-        preference: '프리미엄',
-      },
-    },
-  ]);
+export default function CustomerListScreen({ navigation, route }) {
+  const [customerCards, setCustomerCards] = useState([]);
+  const [currentId, setCurrentId] = useState(1);
+
+  useEffect(() => {
+    if (route.params?.newCustomer) {
+      setCustomerCards((prevCards) => [
+        ...prevCards,
+        {
+          id: currentId,
+          ...route.params.newCustomer,
+        },
+      ]);
+
+      setCurrentId((prevId) => prevId + 1);
+      navigation.setParams({ newCustomer: null });
+    }
+  }, [route.params?.newCustomer]);
 
   const addNewCustomer = () => {
     navigation.navigate('CustomerSetup');
