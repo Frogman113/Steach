@@ -4,6 +4,7 @@ import HomeScreen from '../screens/HomeScreen';
 import LightIconScreen from '../screens/LightIconScreen';
 import CustomerSetupScreen from '../screens/CustomerSetupScreen';
 import RecordingScreen from '../screens/RecordingScreen';
+import CustomerListScreen from '../screens/CustomerListScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -11,9 +12,10 @@ export default function AppNavigator() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Start" component={CustomerSetupScreen} />
+      <Stack.Screen name="Start" component={CustomerListScreen} />
       <Stack.Screen name="LightIcon" component={LightIconScreen} />
       <Stack.Screen name="Recording" component={RecordingScreen} />
+      <Stack.Screen name="CustomerSetup" component={CustomerSetupScreen} />
     </Stack.Navigator>
   );
 }
