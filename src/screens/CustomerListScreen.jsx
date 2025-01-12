@@ -35,7 +35,6 @@ export default function CustomerListScreen({ navigation, route }) {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.container}>
         <Text style={styles.title}>고객 정보 카드</Text>
-
         <View style={styles.content}>
           <ScrollView style={styles.customerCardList}>
             {customerCards.map((card) => (
