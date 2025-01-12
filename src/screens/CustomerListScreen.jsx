@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,22 +7,14 @@ import {
   ScrollView,
   SafeAreaView,
 } from 'react-native';
+import useCustomerStore from '../stores/CustomerStore';
 
 export default function CustomerListScreen({ navigation, route }) {
-  const [customerCards, setCustomerCards] = useState([]);
-  const [currentId, setCurrentId] = useState(1);
+  const { customerCards, addCustomer } = useCustomerStore();
 
   useEffect(() => {
     if (route.params?.newCustomer) {
-      setCustomerCards((prevCards) => [
-        ...prevCards,
-        {
-          id: currentId,
-          ...route.params.newCustomer,
-        },
-      ]);
-
-      setCurrentId((prevId) => prevId + 1);
+      addCustomer(route.params.newCustomer);
       navigation.setParams({ newCustomer: null });
     }
   }, [route.params?.newCustomer]);
@@ -45,13 +37,13 @@ export default function CustomerListScreen({ navigation, route }) {
                     연령대: {card.customerDetails.age}
                   </Text>
                   <Text style={styles.customerCardText}>
-                    목적: {card.customerDetails.purpose}
+                    구매 목적: {card.customerDetails.purpose}
                   </Text>
                   <Text style={styles.customerCardText}>
                     예산: {card.customerDetails.budget}
                   </Text>
                   <Text style={styles.customerCardText}>
-                    선호도: {card.customerDetails.preference}
+                    선호 스타일: {card.customerDetails.preference}
                   </Text>
                 </View>
               </View>
