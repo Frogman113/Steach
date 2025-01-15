@@ -8,20 +8,33 @@ import {
   ScrollView,
 } from 'react-native';
 
-export default function CustomerSetupScreen({ navigation }) {
-  const [salesField, setSalesField] = useState('');
-  const [age, setAge] = useState('');
-  const [purpose, setPurpose] = useState('');
-  const [budget, setBudget] = useState('');
-  const [preference, setPreference] = useState('');
+export default function CustomerSetupScreen({ navigation, route }) {
+  const editMode = route.params?.editMode || false;
+  const cardToEdit = route.params?.cardToEdit;
 
-  const savedCustomerInfo = () => {
+  const [salesField, setSalesField] = useState(
+    editMode ? cardToEdit.salesField : '',
+  );
+  const [age, setAge] = useState(
+    editMode ? cardToEdit.customerDetails.age : '',
+  );
+  const [purpose, setPurpose] = useState(
+    editMode ? cardToEdit.customerDetails.purpose : '',
+  );
+  const [budget, setBudget] = useState(
+    editMode ? cardToEdit.customerDetails.budget : '',
+  );
+  const [preference, setPreference] = useState(
+    editMode ? cardToEdit.customerDetails.preference : '',
+  );
+
+  const handleSavedCustomerInfo = () => {
     if (!salesField.trim()) {
       alert('영업 분야를 입력해주세요');
       return;
     }
 
-    const newCustomer = {
+    const customerCardData = {
       salesField,
       customerDetails: {
         age: age.trim(),
@@ -31,8 +44,13 @@ export default function CustomerSetupScreen({ navigation }) {
       },
     };
 
+    if (editMode) {
+      customerCardData.id = cardToEdit.id;
+    }
+
     navigation.navigate('Start', {
-      newCustomer: newCustomer,
+      newCustomer: customerCardData,
+      isEdit: editMode,
     });
   };
 
@@ -42,7 +60,9 @@ export default function CustomerSetupScreen({ navigation }) {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <Text style={styles.title}>고객 카드 설정</Text>
+        <Text style={styles.title}>
+          {editMode ? '고객 정보 수정' : '고객 카드 설정'}
+        </Text>
         <TextInput
           style={styles.input}
           placeholder="영업 분야 (예: 자동차, 가전제품)"
@@ -78,8 +98,11 @@ export default function CustomerSetupScreen({ navigation }) {
           onChangeText={setPreference}
           returnKeyType="next"
         />
-        <TouchableOpacity style={styles.button} onPress={savedCustomerInfo}>
-          <Text style={styles.buttonText}>등록</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleSavedCustomerInfo}
+        >
+          <Text style={styles.buttonText}>{editMode ? '수정' : '등록'}</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
