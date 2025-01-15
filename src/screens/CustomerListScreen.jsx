@@ -10,18 +10,31 @@ import {
 import useCustomerStore from '../stores/CustomerStore';
 
 export default function CustomerListScreen({ navigation, route }) {
-  const { customerCards, addCustomer } = useCustomerStore();
+  const { customerCards, addCustomer, editCustomer } = useCustomerStore();
   const [selectedCardId, setSelectedCardId] = useState(null);
 
   useEffect(() => {
     if (route.params?.newCustomer) {
-      addCustomer(route.params.newCustomer);
+      if (route.params.isEdit) {
+        editCustomer(route.params.newCustomer.id, route.params.newCustomer);
+      } else {
+        addCustomer(route.params.newCustomer);
+      }
       navigation.setParams({ newCustomer: null });
+      setSelectedCardId(null);
     }
   }, [route.params?.newCustomer]);
 
-  const cardPressAction = (cardId) => {
+  const handleCardPress = (cardId) => {
     setSelectedCardId(selectedCardId === cardId ? null : cardId);
+  };
+
+  const handleEditCustomer = (card) => {
+    navigation.navigate('CustomerSetup', {
+      editMode: true,
+      cardToEdit: card,
+    });
+    setSelectedCardId(null);
   };
 
   const addNewCustomer = () => {
@@ -41,7 +54,7 @@ export default function CustomerListScreen({ navigation, route }) {
             <TouchableOpacity
               key={card.id}
               style={styles.customerCard}
-              onPress={() => cardPressAction(card.id)}
+              onPress={() => handleCardPress(card.id)}
             >
               <Text style={styles.customerCardTitle}>{card.salesField}</Text>
               <View style={styles.customerCardContent}>
@@ -60,24 +73,22 @@ export default function CustomerListScreen({ navigation, route }) {
               </View>
 
               {selectedCardId === card.id && (
-                <View style={styles.cardTouchActions}>
+                <View style={styles.pressCard}>
                   <TouchableOpacity
-                    style={[
-                      styles.touchActionButton,
-                      styles.deleteActionButton,
-                    ]}
+                    style={[styles.touchActionButton, styles.deleteButton]}
                   >
-                    <Text style={styles.actionButtonText}>삭제</Text>
+                    <Text style={styles.pressButtonText}>삭제</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.touchActionButton, styles.editActionButton]}
+                    style={[styles.touchActionButton, styles.editButton]}
+                    onPress={() => handleEditCustomer(card)}
                   >
-                    <Text style={styles.actionButtonText}>정보 수정</Text>
+                    <Text style={styles.pressButtonText}>정보 수정</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[styles.touchActionButton, styles.startActionButton]}
+                    style={[styles.touchActionButton, styles.startButton]}
                   >
-                    <Text style={styles.actionButtonText}>상담 시작</Text>
+                    <Text style={styles.pressButtonText}>상담 시작</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -85,7 +96,7 @@ export default function CustomerListScreen({ navigation, route }) {
           ))}
         </ScrollView>
 
-        <View style={styles.actionFooter}>
+        <View style={styles.pressFooter}>
           <TouchableOpacity style={styles.addButton} onPress={addNewCustomer}>
             <Text style={styles.addButtonText}>고객 카드 추가</Text>
           </TouchableOpacity>
@@ -143,7 +154,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#666666',
   },
-  cardTouchActions: {
+  pressCard: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: 12,
@@ -158,21 +169,21 @@ const styles = StyleSheet.create({
     borderRadius: 6,
     alignItems: 'center',
   },
-  deleteActionButton: {
+  deleteButton: {
     backgroundColor: '#FF3B30',
   },
-  editActionButton: {
+  editButton: {
     backgroundColor: '#007AFF',
   },
-  startActionButton: {
+  startButton: {
     backgroundColor: '#34C759',
   },
-  actionButtonText: {
+  pressButtonText: {
     color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '500',
   },
-  actionFooter: {
+  pressFooter: {
     backgroundColor: '#F5F5F5',
     paddingVertical: 10,
     alignItems: 'center',
