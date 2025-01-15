@@ -22,6 +22,11 @@ const useCustomerStore = create((set) => ({
         card.id === id ? { ...card, ...updatedCustomer } : card,
       ),
     })),
+
+  deleteCustomer: (id) =>
+    set((state) => ({
+      customerCards: state.customerCards.filter((card) => card.id !== id),
+    })),
 }));
 
 export default useCustomerStore;
