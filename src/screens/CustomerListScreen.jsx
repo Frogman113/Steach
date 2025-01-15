@@ -10,7 +10,8 @@ import {
 import useCustomerStore from '../stores/CustomerStore';
 
 export default function CustomerListScreen({ navigation, route }) {
-  const { customerCards, addCustomer, editCustomer } = useCustomerStore();
+  const { customerCards, addCustomer, editCustomer, deleteCustomer } =
+    useCustomerStore();
   const [selectedCardId, setSelectedCardId] = useState(null);
 
   useEffect(() => {
@@ -29,6 +30,10 @@ export default function CustomerListScreen({ navigation, route }) {
     setSelectedCardId(selectedCardId === cardId ? null : cardId);
   };
 
+  const addNewCustomer = () => {
+    navigation.navigate('CustomerSetup');
+  };
+
   const handleEditCustomer = (card) => {
     navigation.navigate('CustomerSetup', {
       editMode: true,
@@ -37,8 +42,9 @@ export default function CustomerListScreen({ navigation, route }) {
     setSelectedCardId(null);
   };
 
-  const addNewCustomer = () => {
-    navigation.navigate('CustomerSetup');
+  const handleDeleteCustomer = (id) => {
+    deleteCustomer(id);
+    setSelectedCardId(null);
   };
 
   return (
@@ -76,6 +82,7 @@ export default function CustomerListScreen({ navigation, route }) {
                 <View style={styles.pressCard}>
                   <TouchableOpacity
                     style={[styles.touchActionButton, styles.deleteButton]}
+                    onPress={() => handleDeleteCustomer(card.id)}
                   >
                     <Text style={styles.pressButtonText}>삭제</Text>
                   </TouchableOpacity>
