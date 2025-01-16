@@ -10,7 +10,9 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { WS_SERVER } from '@env';
 
-export default function RecordingScreen() {
+export default function RecordingScreen({ route }) {
+  const customerInfo = route.params?.customerInfo;
+
   const [recording, setRecording] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [clovaSttText, setClovaSttText] = useState('');
@@ -21,7 +23,16 @@ export default function RecordingScreen() {
   useEffect(() => {
     ws.current = new WebSocket(WS_SERVER);
 
-    ws.current.onopen = () => {};
+    ws.current.onopen = () => {
+      if (customerInfo) {
+        ws.current.send(
+          JSON.stringify({
+            type: 'customerCardContext',
+            customerInfo: customerInfo,
+          }),
+        );
+      }
+    };
 
     ws.current.onmessage = (event) => {
       try {
@@ -54,7 +65,7 @@ export default function RecordingScreen() {
         ws.current.close();
       }
     };
-  }, []);
+  }, [customerInfo]);
 
   const startRecording = async () => {
     try {
