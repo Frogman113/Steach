@@ -10,7 +10,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { WS_SERVER } from '@env';
 
-export default function StartButtonScreen() {
+export default function RecordingScreen() {
   const [recording, setRecording] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [clovaSttText, setClovaSttText] = useState('');
@@ -153,7 +153,7 @@ export default function StartButtonScreen() {
   };
 
   return (
-    <View style={styles.startButtonContainer}>
+    <View style={styles.recordingContainer}>
       <TouchableOpacity onPress={handleRecordButton}>
         <MaterialIcons
           name="multitrack-audio"
@@ -179,7 +179,7 @@ export default function StartButtonScreen() {
 }
 
 const styles = StyleSheet.create({
-  startButtonContainer: {
+  recordingContainer: {
     flex: 1,
     backgroundColor: 'white',
     alignItems: 'center',
