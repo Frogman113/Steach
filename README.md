@@ -1,7 +1,17 @@
 # Steach
 
-스티치는 영업직에 종사하는 사람들 위해 제작된 앱입니다.  
+<div align="center">
+<img src="https://github.com/user-attachments/assets/a22bdc24-da4f-4442-8eb8-a2eae108451f" alt="Steach" width="320"/>
+</div>
+
+<br>
+
+<div align="center">
+스티치는 영업직에 종사하는 사람들 위해 제작된 앱입니다.
+
 AI와 함께 고객을 응대하여 더 좋은 서비스를 제공할 수 있습니다.
+
+</div>
 
 ## 목차
 
