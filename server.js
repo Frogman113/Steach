@@ -76,7 +76,7 @@ wss.on('connection', (ws) => {
         } catch (error) {
           ws.send(
             JSON.stringify({
-              error: 'customerContext 실패' + error.message,
+              error: 'customerContext 처리 실패' + error.message,
             }),
           );
         }
@@ -96,13 +96,27 @@ wss.on('connection', (ws) => {
           },
         );
 
+        if (!clovaResponse.ok) {
+          throw new Error(`CLOVA API 응답 실패, ${clovaResponse.status}`);
+        }
+
         const clovaApiResult = await clovaResponse.json();
 
-        if (clovaApiResult.text) {
-          const openaiApiResult = await openaiApi(
-            clovaApiResult.text,
-            customerContext,
+        if (!clovaApiResult.text) {
+          ws.send(
+            JSON.stringify({
+              error: 'CLOVA API에서 변환된 텍스트 없음',
+            }),
           );
+          return;
+        }
+
+        const openaiApiResult = await openaiApi(
+          clovaApiResult.text,
+          customerContext,
+        );
+
+        try {
           const voiceAPiResult = await openaiApiTts(openaiApiResult);
 
           ws.send(
@@ -112,12 +126,18 @@ wss.on('connection', (ws) => {
               audioData: voiceAPiResult.toString('base64'),
             }),
           );
+        } catch (error) {
+          ws.send(
+            JSON.stringify({
+              error: 'TTS 변환 실패' + error.message,
+            }),
+          );
         }
       }
     } catch (error) {
       ws.send(
         JSON.stringify({
-          error: 'openAi API 오류' + error.message,
+          error: 'WebSocket message 처리 오류' + error.message,
         }),
       );
     }
