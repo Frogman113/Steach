@@ -10,7 +10,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { WS_SERVER } from '@env';
 
-export default function RecordingScreen({ route }) {
+export default function RecordingScreen({ navigation, route }) {
   const customerInfo = route.params?.customerInfo;
 
   const [recording, setRecording] = useState(null);
@@ -134,6 +134,10 @@ export default function RecordingScreen({ route }) {
     }
   };
 
+  const handleEndButton = () => {
+    navigation.navigate('Start');
+  };
+
   const convertSpeechToText = async (audioUri) => {
     try {
       setLoading(true);
@@ -172,16 +176,19 @@ export default function RecordingScreen({ route }) {
           color={isRecording ? 'red' : 'black'}
         />
       </TouchableOpacity>
+      <TouchableOpacity style={styles.endButton} onPress={handleEndButton}>
+        <Text style={styles.endButtonText}>상담 종료</Text>
+      </TouchableOpacity>
       {loading && <ActivityIndicator size="large" color="black" />}
       {clovaSttText ? (
         <View style={styles.textContainer}>
-          <Text style={styles.label}>음성 인식 결과</Text>
+          <Text style={styles.textLabel}>음성 인식 결과</Text>
           <Text style={styles.resultText}>{clovaSttText}</Text>
         </View>
       ) : null}
       {openaiContext ? (
         <View style={styles.textContainer}>
-          <Text style={styles.label}>AI 답변</Text>
+          <Text style={styles.textLabel}>AI 답변</Text>
           <Text style={styles.resultText}>{openaiContext}</Text>
         </View>
       ) : null}
@@ -192,7 +199,7 @@ export default function RecordingScreen({ route }) {
 const styles = StyleSheet.create({
   recordingContainer: {
     flex: 1,
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -200,19 +207,33 @@ const styles = StyleSheet.create({
     marginTop: 30,
     fontSize: 16,
     marginBottom: 5,
-    color: 'black',
+    color: '#000000',
   },
-  label: {
+  textLabel: {
     fontSize: 19,
     fontWeight: 'bold',
     marginBottom: 5,
     textAlign: 'center',
-    color: 'orange',
+    color: '#ff8c00',
   },
   resultText: {
     fontSize: 16,
-    color: 'black',
+    color: '#000000',
     textAlign: 'center',
     marginHorizontal: 20,
+  },
+  endButton: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    position: 'absolute',
+    bottom: 70,
+    right: 40,
+  },
+  endButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
