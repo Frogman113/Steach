@@ -15,7 +15,7 @@ export default function RecordingScreen({ navigation, route }) {
 
   const [recording, setRecording] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
-  const [clovaSttText, setClovaSttText] = useState('');
+  const [whisperSttText, setWhisperSttText] = useState('');
   const [openaiContext, setOpenaiContext] = useState('');
   const [loading, setLoading] = useState(false);
   const ws = useRef(null);
@@ -37,8 +37,9 @@ export default function RecordingScreen({ navigation, route }) {
     ws.current.onmessage = (event) => {
       try {
         const response = JSON.parse(event.data);
-        if (response.clovaApiResult && response.openaiApiResult) {
-          setClovaSttText(response.clovaApiResult);
+
+        if (response.openaiApiResult) {
+          setWhisperSttText(response.sttText);
           setOpenaiContext(response.openaiApiResult);
 
           if (response.audioData) {
@@ -84,10 +85,10 @@ export default function RecordingScreen({ navigation, route }) {
       await createRecording.prepareToRecordAsync({
         android: {
           extension: '.wav',
-          outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_WAV,
-          audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_DEFAULT,
-          numberOfChannels: 1,
+          outputFormat: Audio.RECORDING_OPTION_ANDROID_OUTPUT_FORMAT_PCM,
+          audioEncoder: Audio.RECORDING_OPTION_ANDROID_AUDIO_ENCODER_PCM_16BIT,
           sampleRate: 16000,
+          numberOfChannels: 1,
         },
         ios: {
           extension: '.wav',
@@ -102,7 +103,7 @@ export default function RecordingScreen({ navigation, route }) {
       setRecording(createRecording);
       setIsRecording(true);
     } catch (error) {
-      alert('녹음 시작 불가');
+      alert('녹음 시작 불가: ' + error.message);
     }
   };
 
@@ -180,10 +181,10 @@ export default function RecordingScreen({ navigation, route }) {
         <Text style={styles.endButtonText}>상담 종료</Text>
       </TouchableOpacity>
       {loading && <ActivityIndicator size="large" color="black" />}
-      {clovaSttText ? (
+      {whisperSttText ? (
         <View style={styles.textContainer}>
           <Text style={styles.textLabel}>음성 인식 결과</Text>
-          <Text style={styles.resultText}>{clovaSttText}</Text>
+          <Text style={styles.resultText}>{whisperSttText}</Text>
         </View>
       ) : null}
       {openaiContext ? (
