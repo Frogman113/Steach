@@ -71,12 +71,12 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   titleText: {
-    color: '#007AFF',
+    color: '#3D3A3C',
     fontSize: 80,
     fontWeight: 'bold',
   },
@@ -84,12 +84,12 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   startButton: {
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 10,
     paddingHorizontal: 20,
   },
   startButtonText: {
-    color: 'black',
+    color: '#3D3A3C',
     fontSize: 25,
     fontWeight: 'bold',
   },

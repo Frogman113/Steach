@@ -191,13 +191,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   deleteButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: '#3D3A3C',
   },
   editButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#3D3A3C',
   },
   startButton: {
-    backgroundColor: '#34C759',
+    backgroundColor: '#3D3A3C',
   },
   pressButtonText: {
     color: '#FFFFFF',
@@ -210,7 +210,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#3D3A3C',
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
