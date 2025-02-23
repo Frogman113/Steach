@@ -6,9 +6,9 @@ import {
   Text,
   ActivityIndicator,
 } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
 import { Audio } from 'expo-av';
 import { WS_SERVER } from '@env';
+import { RecordWaveButton } from '../components/RecordWaveButton';
 
 export default function RecordingScreen({ navigation, route }) {
   const customerInfo = route.params?.customerInfo;
@@ -171,11 +171,9 @@ export default function RecordingScreen({ navigation, route }) {
   return (
     <View style={styles.recordingContainer}>
       <TouchableOpacity onPress={handleRecordButton}>
-        <MaterialIcons
-          name="multitrack-audio"
-          size={100}
-          color={isRecording ? 'red' : 'black'}
-        />
+        <View style={styles.recordButton}>
+          <RecordWaveButton isRecording={isRecording} />
+        </View>
       </TouchableOpacity>
       <TouchableOpacity style={styles.endButton} onPress={handleEndButton}>
         <Text style={styles.endButtonText}>상담 종료</Text>
@@ -224,7 +222,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
   },
   endButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#3D3A3C',
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
@@ -236,5 +234,11 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
+  },
+  recordButton: {
+    width: 100,
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
