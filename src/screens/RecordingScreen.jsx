@@ -5,6 +5,8 @@ import {
   TouchableOpacity,
   Text,
   ActivityIndicator,
+  ScrollView,
+  SafeAreaView,
 } from 'react-native';
 import { Audio } from 'expo-av';
 import { WS_SERVER } from '@env';
@@ -147,8 +149,8 @@ export default function RecordingScreen({ navigation, route }) {
         throw new Error('WebSocket 미연결');
       }
 
-      const audioresponse = await fetch(audioUri);
-      const audioBinaryData = await audioresponse.arrayBuffer();
+      const audioResponse = await fetch(audioUri);
+      const audioBinaryData = await audioResponse.arrayBuffer();
 
       ws.current.send(audioBinaryData);
     } catch (error) {
@@ -169,57 +171,106 @@ export default function RecordingScreen({ navigation, route }) {
   };
 
   return (
-    <View style={styles.recordingContainer}>
-      <TouchableOpacity onPress={handleRecordButton}>
-        <View style={styles.recordButton}>
-          <RecordWaveButton isRecording={isRecording} />
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.recordingContainer}>
+        <View style={styles.headerContainer}>
+          <TouchableOpacity onPress={handleRecordButton}>
+            <View style={styles.recordButton}>
+              <RecordWaveButton isRecording={isRecording} />
+            </View>
+          </TouchableOpacity>
         </View>
-      </TouchableOpacity>
-      <TouchableOpacity style={styles.endButton} onPress={handleEndButton}>
-        <Text style={styles.endButtonText}>상담 종료</Text>
-      </TouchableOpacity>
-      {loading && <ActivityIndicator size="large" color="black" />}
-      {whisperSttText ? (
-        <View style={styles.textContainer}>
-          <Text style={styles.textLabel}>음성 인식 결과</Text>
-          <Text style={styles.resultText}>{whisperSttText}</Text>
-        </View>
-      ) : null}
-      {openaiContext ? (
-        <View style={styles.textContainer}>
-          <Text style={styles.textLabel}>AI 답변</Text>
-          <Text style={styles.resultText}>{openaiContext}</Text>
-        </View>
-      ) : null}
-    </View>
+        {loading && (
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#000000" />
+          </View>
+        )}
+        <ScrollView
+          style={styles.scrollContainer}
+          contentContainerStyle={styles.scrollContent}
+        >
+          {whisperSttText ? (
+            <View style={styles.resultCard}>
+              <Text style={styles.textLabel}>음성 인식 결과</Text>
+              <Text style={styles.resultText}>{whisperSttText}</Text>
+            </View>
+          ) : null}
+          {openaiContext ? (
+            <View style={styles.resultCard}>
+              <Text style={styles.textLabel}>AI 답변</Text>
+              <Text style={styles.resultText}>{openaiContext}</Text>
+            </View>
+          ) : null}
+          <View style={styles.scrollBottomPadding} />
+        </ScrollView>
+        <TouchableOpacity style={styles.endButton} onPress={handleEndButton}>
+          <Text style={styles.endButtonText}>상담 종료</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
   recordingContainer: {
     flex: 1,
     backgroundColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
+    position: 'relative',
   },
-  textContainer: {
-    marginTop: 30,
-    fontSize: 16,
-    marginBottom: 5,
-    color: '#000000',
+  headerContainer: {
+    alignItems: 'center',
+    paddingTop: 20,
+    paddingBottom: 10,
+    zIndex: 10,
+  },
+  loadingContainer: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginLeft: -20,
+    marginTop: -20,
+    zIndex: 20,
+  },
+  scrollContainer: {
+    flex: 1,
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  scrollContent: {
+    paddingTop: 10,
+    paddingBottom: 80,
+  },
+  scrollBottomPadding: {
+    height: 20,
+  },
+  resultCard: {
+    backgroundColor: '#F8F8F8',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
   },
   textLabel: {
-    fontSize: 19,
+    fontSize: 18,
     fontWeight: 'bold',
-    marginBottom: 5,
-    textAlign: 'center',
-    color: '#ff8c00',
+    marginBottom: 10,
+    color: '#333333',
   },
   resultText: {
     fontSize: 16,
     color: '#000000',
-    textAlign: 'center',
-    marginHorizontal: 20,
+    lineHeight: 24,
+  },
+  recordButton: {
+    width: 120,
+    height: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   endButton: {
     backgroundColor: '#3D3A3C',
@@ -227,18 +278,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     borderRadius: 8,
     position: 'absolute',
-    bottom: 70,
-    right: 40,
+    bottom: 20,
+    right: 20,
+    zIndex: 10,
   },
   endButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
-  },
-  recordButton: {
-    width: 100,
-    height: 100,
-    justifyContent: 'center',
-    alignItems: 'center',
   },
 });
