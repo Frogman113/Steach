@@ -181,6 +181,11 @@ export default function RecordingScreen({ navigation, route }) {
     navigation.navigate('Start');
   };
 
+  const handleNewSession = () => {
+    setWhisperSttText('');
+    setOpenaiContext('');
+  };
+
   const convertSpeechToText = async (audioUri) => {
     try {
       setLoading(true);
@@ -262,9 +267,18 @@ export default function RecordingScreen({ navigation, route }) {
           ) : null}
           <View style={styles.scrollBottomPadding} />
         </ScrollView>
-        <TouchableOpacity style={styles.endButton} onPress={handleEndButton}>
-          <Text style={styles.endButtonText}>상담 종료</Text>
-        </TouchableOpacity>
+        <View style={styles.bottomButtonsContainer}>
+          <TouchableOpacity
+            style={styles.newSessionButton}
+            onPress={handleNewSession}
+          >
+            <Text style={styles.newSessionButtonText}>새 세션</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.endButton} onPress={handleEndButton}>
+            <Text style={styles.endButtonText}>상담 종료</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -386,24 +400,45 @@ const styles = StyleSheet.create({
     color: '#000000',
     lineHeight: 24,
   },
+  bottomButtonsContainer: {
+    flexDirection: 'row',
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: '#FFFFFF',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderTopWidth: 1,
+    borderTopColor: '#E9ECEF',
+    justifyContent: 'space-between',
+  },
+  newSessionButton: {
+    flex: 1,
+    backgroundColor: '#F8F9FA',
+    paddingVertical: 12,
+    borderRadius: 8,
+    marginRight: 8,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#CED4DA',
+  },
+  newSessionButtonText: {
+    color: '#495057',
+    fontSize: 16,
+    fontWeight: '500',
+  },
   endButton: {
+    flex: 1,
     backgroundColor: '#3D3A3C',
     paddingVertical: 12,
-    paddingHorizontal: 24,
     borderRadius: 8,
-    position: 'absolute',
-    bottom: 20,
-    right: 20,
-    zIndex: 10,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
+    marginLeft: 8,
+    alignItems: 'center',
   },
   endButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '500',
   },
 });
