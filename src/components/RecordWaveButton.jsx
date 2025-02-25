@@ -6,7 +6,13 @@ export const RecordWaveButton = ({ isRecording }) => {
     [...Array(100)].map(() => new Animated.Value(1)),
   ).current;
 
+  const animationRef = useRef(null);
+
   useEffect(() => {
+    if (animationRef.current) {
+      animationRef.current.stop();
+    }
+
     if (isRecording) {
       const createRandomAnimation = (value) => {
         const randomScale = Math.random() * (2.5 - 1.2) + 1.2;
@@ -30,12 +36,28 @@ export const RecordWaveButton = ({ isRecording }) => {
 
       const startAnimation = () => {
         animationDetails.forEach((value) => {
-          Animated.loop(createRandomAnimation(value)).start();
+          animationRef.current = Animated.loop(createRandomAnimation(value));
+          animationRef.current.start();
         });
       };
 
       startAnimation();
+    } else {
+      animationDetails.forEach((value) => {
+        Animated.timing(value, {
+          toValue: 1,
+          duration: 300,
+          easing: Easing.ease,
+          useNativeDriver: true,
+        }).start();
+      });
     }
+
+    return () => {
+      if (animationRef.current) {
+        animationRef.current.stop();
+      }
+    };
   }, [isRecording]);
 
   return (
