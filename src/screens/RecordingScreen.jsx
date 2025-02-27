@@ -90,6 +90,21 @@ export default function RecordingScreen({ navigation, route }) {
     return () => stopRecordingTimer();
   }, [isRecording]);
 
+  const getCustomerSummary = () => {
+    if (!customerInfo) {
+      return '고객 정보 없음';
+    }
+    const details = [
+      customerInfo.salesField,
+      customerInfo.customerDetails?.age,
+      customerInfo.customerDetails?.purpose,
+      customerInfo.customerDetails?.budget,
+      customerInfo.customerDetails?.preference,
+    ].filter(Boolean);
+
+    return details.length > 0 ? details.join(' / ') : '고객 정보 없음';
+  };
+
   const startRecordingTimer = () => {
     setRecordDuration(0);
     timerRef.current = setInterval(() => {
@@ -219,6 +234,10 @@ export default function RecordingScreen({ navigation, route }) {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.recordingContainer}>
         <View style={styles.headerContainer}>
+          <Text style={styles.headerTitle}>영업 상담</Text>
+          <Text style={styles.customerInfo}>{getCustomerSummary()}</Text>
+        </View>
+        <View style={styles.recordControlContainer}>
           {isRecording && (
             <View style={styles.recordingStatus}>
               <View style={styles.recordingIndicator} />
@@ -244,7 +263,7 @@ export default function RecordingScreen({ navigation, route }) {
         </View>
         {loading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#000000" />
+            <ActivityIndicator size="large" color="#FFFFFF" />
             <Text style={styles.loadingText}>처리 중...</Text>
           </View>
         )}
@@ -274,7 +293,6 @@ export default function RecordingScreen({ navigation, route }) {
           >
             <Text style={styles.newSessionButtonText}>새 세션</Text>
           </TouchableOpacity>
-
           <TouchableOpacity style={styles.endButton} onPress={handleEndButton}>
             <Text style={styles.endButtonText}>상담 종료</Text>
           </TouchableOpacity>
@@ -295,15 +313,36 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   headerContainer: {
+    backgroundColor: '#3D3A3C',
+    paddingVertical: 16,
+    paddingHorizontal: 20,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 4,
     alignItems: 'center',
-    paddingTop: 20,
-    paddingBottom: 20,
-    zIndex: 10,
+  },
+  headerTitle: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#FFFFFF',
+    textAlign: 'center',
+    marginBottom: 4,
+  },
+  customerInfo: {
+    fontSize: 14,
+    color: '#E0E0E0',
+    textAlign: 'center',
+  },
+  recordControlContainer: {
+    paddingVertical: 30,
+    alignItems: 'center',
   },
   recordingStatus: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 15,
+    marginBottom: 35,
     paddingHorizontal: 15,
     paddingVertical: 5,
     backgroundColor: '#FF00001A',
