@@ -7,6 +7,7 @@ import {
   ActivityIndicator,
   ScrollView,
   SafeAreaView,
+  Animated,
 } from 'react-native';
 import { Audio } from 'expo-av';
 import { WS_SERVER } from '@env';
@@ -25,6 +26,8 @@ export default function RecordingScreen({ navigation, route }) {
   const ws = useRef(null);
   const timerRef = useRef(null);
   const scrollViewRef = useRef(null);
+  const fadeMotion = useRef(new Animated.Value(0)).current;
+  const slideMotion = useRef(new Animated.Value(50)).current;
 
   useEffect(() => {
     ws.current = new WebSocket(WS_SERVER);
@@ -90,19 +93,33 @@ export default function RecordingScreen({ navigation, route }) {
     return () => stopRecordingTimer();
   }, [isRecording]);
 
-  const getCustomerSummary = () => {
-    if (!customerInfo) {
-      return '고객 정보 없음';
+  useEffect(() => {
+    if (whisperSttText || openaiContext) {
+      Animated.parallel([
+        Animated.timing(fadeMotion, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideMotion, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]).start();
     }
-    const details = [
+  }, [whisperSttText, openaiContext]);
+
+  const headerCustomerCardInfo = () => {
+    return [
       customerInfo.salesField,
       customerInfo.customerDetails?.age,
       customerInfo.customerDetails?.purpose,
       customerInfo.customerDetails?.budget,
       customerInfo.customerDetails?.preference,
-    ].filter(Boolean);
-
-    return details.length > 0 ? details.join(' / ') : '고객 정보 없음';
+    ]
+      .filter(Boolean)
+      .join(' / ');
   };
 
   const startRecordingTimer = () => {
@@ -199,6 +216,8 @@ export default function RecordingScreen({ navigation, route }) {
   const handleNewSession = () => {
     setWhisperSttText('');
     setOpenaiContext('');
+    fadeMotion.setValue(0);
+    slideMotion.setValue(50);
   };
 
   const convertSpeechToText = async (audioUri) => {
@@ -235,7 +254,7 @@ export default function RecordingScreen({ navigation, route }) {
       <View style={styles.recordingContainer}>
         <View style={styles.headerContainer}>
           <Text style={styles.headerTitle}>영업 상담</Text>
-          <Text style={styles.customerInfo}>{getCustomerSummary()}</Text>
+          <Text style={styles.customerInfo}>{getCustomerCardInfo()}</Text>
         </View>
         <View style={styles.recordControlContainer}>
           {isRecording && (
@@ -267,25 +286,35 @@ export default function RecordingScreen({ navigation, route }) {
             <Text style={styles.loadingText}>처리 중...</Text>
           </View>
         )}
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.scrollContainer}
-          contentContainerStyle={styles.scrollContent}
+        <Animated.View
+          style={[
+            styles.resultsContainer,
+            {
+              opacity: fadeMotion,
+              transform: [{ translateY: slideMotion }],
+            },
+          ]}
         >
-          {whisperSttText ? (
-            <View style={styles.resultCard}>
-              <Text style={styles.textLabel}>음성 인식 결과</Text>
-              <Text style={styles.resultText}>{whisperSttText}</Text>
-            </View>
-          ) : null}
-          {openaiContext ? (
-            <View style={styles.resultCard}>
-              <Text style={styles.textLabel}>AI 답변</Text>
-              <Text style={styles.resultText}>{openaiContext}</Text>
-            </View>
-          ) : null}
-          <View style={styles.scrollBottomPadding} />
-        </ScrollView>
+          <ScrollView
+            ref={scrollViewRef}
+            style={styles.scrollContainer}
+            contentContainerStyle={styles.scrollContent}
+          >
+            {whisperSttText ? (
+              <View style={styles.resultCard}>
+                <Text style={styles.textLabel}>음성 인식 결과</Text>
+                <Text style={styles.resultText}>{whisperSttText}</Text>
+              </View>
+            ) : null}
+            {openaiContext ? (
+              <View style={styles.resultCard}>
+                <Text style={styles.textLabel}>AI 답변</Text>
+                <Text style={styles.resultText}>{openaiContext}</Text>
+              </View>
+            ) : null}
+            <View style={styles.scrollBottomPadding} />
+          </ScrollView>
+        </Animated.View>
         <View style={styles.bottomButtonsContainer}>
           <TouchableOpacity
             style={styles.newSessionButton}
@@ -386,6 +415,18 @@ const styles = StyleSheet.create({
     marginTop: 30,
     fontSize: 14,
     color: '#666666',
+  },
+  resultsContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginHorizontal: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 3,
   },
   loadingContainer: {
     position: 'absolute',
