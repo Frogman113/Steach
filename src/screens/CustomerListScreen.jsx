@@ -30,7 +30,7 @@ export default function CustomerListScreen({ navigation, route }) {
     setSelectedCardId(selectedCardId === cardId ? null : cardId);
   };
 
-  const addNewCustomer = () => {
+  const handleAddNewCustomer = () => {
     navigation.navigate('CustomerSetup');
   };
 
@@ -44,6 +44,16 @@ export default function CustomerListScreen({ navigation, route }) {
 
   const handleDeleteCustomer = (id) => {
     deleteCustomer(id);
+    setSelectedCardId(null);
+  };
+
+  const handleStartConsultation = (card) => {
+    navigation.navigate('Recording', {
+      customerInfo: {
+        salesField: card.salesField,
+        customerDetails: card.customerDetails,
+      },
+    });
     setSelectedCardId(null);
   };
 
@@ -94,6 +104,7 @@ export default function CustomerListScreen({ navigation, route }) {
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.touchActionButton, styles.startButton]}
+                    onPress={() => handleStartConsultation(card)}
                   >
                     <Text style={styles.pressButtonText}>상담 시작</Text>
                   </TouchableOpacity>
@@ -104,7 +115,10 @@ export default function CustomerListScreen({ navigation, route }) {
         </ScrollView>
 
         <View style={styles.pressFooter}>
-          <TouchableOpacity style={styles.addButton} onPress={addNewCustomer}>
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={handleAddNewCustomer}
+          >
             <Text style={styles.addButtonText}>고객 카드 추가</Text>
           </TouchableOpacity>
         </View>
@@ -177,13 +191,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   deleteButton: {
-    backgroundColor: '#FF3B30',
+    backgroundColor: '#3D3A3C',
   },
   editButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#3D3A3C',
   },
   startButton: {
-    backgroundColor: '#34C759',
+    backgroundColor: '#3D3A3C',
   },
   pressButtonText: {
     color: '#FFFFFF',
@@ -196,7 +210,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   addButton: {
-    backgroundColor: '#007AFF',
+    backgroundColor: '#3D3A3C',
     paddingVertical: 16,
     borderRadius: 8,
     alignItems: 'center',
