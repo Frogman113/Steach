@@ -5,40 +5,34 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
-import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 
 export default function HomeScreen({ navigation }) {
   const titleOpacity = useSharedValue(0);
   const titleScale = useSharedValue(0.5);
   const startButtonOpacity = useSharedValue(0);
-  const lightIconButtonOpacity = useSharedValue(0);
+  const imageOpacity = useSharedValue(0);
 
-  const titleAnimationStyle = useAnimatedStyle(() => {
-    return {
-      opacity: titleOpacity.value,
-      transform: [{ scale: titleScale.value }],
-    };
-  });
+  const titleAnimationStyle = useAnimatedStyle(() => ({
+    opacity: titleOpacity.value,
+    transform: [{ scale: titleScale.value }],
+  }));
 
-  const startButtonAnimationStyle = useAnimatedStyle(() => {
-    return {
-      opacity: startButtonOpacity.value,
-    };
-  });
+  const startButtonAnimationStyle = useAnimatedStyle(() => ({
+    opacity: startButtonOpacity.value,
+  }));
 
-  const lightIconButtonAnimationStyle = useAnimatedStyle(() => {
-    return {
-      opacity: lightIconButtonOpacity.value,
-    };
-  });
+  const imageAnimationStyle = useAnimatedStyle(() => ({
+    opacity: imageOpacity.value,
+  }));
 
   useEffect(() => {
-    titleOpacity.value = withTiming(1, { duration: 2000 });
-    titleScale.value = withTiming(1, { duration: 2000 });
+    imageOpacity.value = withTiming(1, { duration: 2000 });
 
     setTimeout(() => {
-      startButtonOpacity.value = withTiming(1, { duration: 1000 });
-      lightIconButtonOpacity.value = withTiming(1, { duration: 1000 });
+      startButtonOpacity.value = withTiming(1, { duration: 2000 });
+      titleOpacity.value = withTiming(1, { duration: 1000 });
+      titleScale.value = withTiming(1, { duration: 1000 });
     }, 2000);
   }, []);
 
@@ -57,12 +51,12 @@ export default function HomeScreen({ navigation }) {
           <Text style={styles.startButtonText}>시작하기</Text>
         </TouchableOpacity>
       </Animated.View>
-      <Animated.View
-        style={[styles.lightButtonContainer, lightIconButtonAnimationStyle]}
-      >
-        <TouchableOpacity onPress={() => navigation.navigate('LightIcon')}>
-          <Ionicons name="bulb" size={32} color="#FFCC02" />
-        </TouchableOpacity>
+      <Animated.View style={[styles.imageContainer, imageAnimationStyle]}>
+        <Image
+          source={require('../../assets/suit.png')}
+          style={styles.image}
+          contentFit="contain"
+        />
       </Animated.View>
     </View>
   );
@@ -71,25 +65,26 @@ export default function HomeScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   titleText: {
-    color: '#007AFF',
+    color: '#3D3A3C',
     fontSize: 80,
     fontWeight: 'bold',
   },
   startButtonContainer: {
     marginTop: 20,
+    zIndex: 2,
   },
   startButton: {
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     paddingVertical: 10,
     paddingHorizontal: 20,
   },
   startButtonText: {
-    color: 'black',
+    color: '#3D3A3C',
     fontSize: 25,
     fontWeight: 'bold',
   },
@@ -97,5 +92,16 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: 35,
     bottom: 50,
+  },
+  imageContainer: {
+    position: 'absolute',
+    bottom: 20,
+    alignItems: 'center',
+    width: '100%',
+    left: 170,
+  },
+  image: {
+    width: 470,
+    height: 470,
   },
 });
