@@ -13,6 +13,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import { WS_SERVER } from '@env';
 import { RecordWaveButton } from '../components/RecordWaveButton';
+import ConsultationHeader from '../components/ConsultationHeader';
 
 export default function RecordingScreen({ navigation, route }) {
   const customerInfo = route.params?.customerInfo;
@@ -120,18 +121,6 @@ export default function RecordingScreen({ navigation, route }) {
       ]).start();
     }
   }, [whisperSttText, openaiContext]);
-
-  const headerCustomerCardInfo = () => {
-    return [
-      customerInfo.salesField,
-      customerInfo.customerDetails?.age,
-      customerInfo.customerDetails?.purpose,
-      customerInfo.customerDetails?.budget,
-      customerInfo.customerDetails?.preference,
-    ]
-      .filter(Boolean)
-      .join(' / ');
-  };
 
   const startRecordingTimer = () => {
     setRecordDuration(0);
@@ -280,10 +269,7 @@ export default function RecordingScreen({ navigation, route }) {
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.recordingContainer}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>영업 상담</Text>
-          <Text style={styles.customerInfo}>{headerCustomerCardInfo()}</Text>
-        </View>
+        <ConsultationHeader customerInfo={customerInfo} />
         <View style={styles.recordControlContainer}>
           <TouchableOpacity
             onPress={handleRecordButton}
@@ -439,29 +425,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#FFFFFF',
     position: 'relative',
-  },
-  headerContainer: {
-    backgroundColor: '#3D3A3C',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  customerInfo: {
-    fontSize: 14,
-    color: '#E0E0E0',
-    textAlign: 'center',
   },
   recordControlContainer: {
     paddingVertical: 30,
