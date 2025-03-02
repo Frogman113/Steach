@@ -314,35 +314,106 @@ export default function RecordingScreen({ navigation, route }) {
             <Text style={styles.loadingText}>처리 중...</Text>
           </View>
         )}
-        <Animated.View
-          style={[
-            styles.resultsContainer,
-            {
-              opacity: fadeMotion,
-              transform: [{ translateY: slideMotion }],
-            },
-          ]}
-        >
-          <ScrollView
-            ref={scrollViewRef}
-            style={styles.scrollContainer}
-            contentContainerStyle={styles.scrollContent}
+        {whisperSttText || openaiContext ? (
+          <Animated.View
+            style={[
+              styles.resultsContainer,
+              {
+                opacity: fadeMotion,
+                transform: [{ translateY: slideMotion }],
+              },
+            ]}
           >
-            {whisperSttText ? (
-              <View style={styles.resultCard}>
-                <Text style={styles.textLabel}>음성 인식 결과</Text>
-                <Text style={styles.resultText}>{whisperSttText}</Text>
+            <ScrollView
+              ref={scrollViewRef}
+              style={styles.scrollContainer}
+              contentContainerStyle={styles.scrollContent}
+            >
+              {whisperSttText ? (
+                <View style={styles.resultCard}>
+                  <Text style={styles.textLabel}>음성 인식 결과</Text>
+                  <Text style={styles.resultText}>{whisperSttText}</Text>
+                </View>
+              ) : null}
+              {openaiContext ? (
+                <View style={styles.resultCard}>
+                  <Text style={styles.textLabel}>AI 답변</Text>
+                  <Text style={styles.resultText}>{openaiContext}</Text>
+                </View>
+              ) : null}
+              <View style={styles.scrollBottomPadding} />
+            </ScrollView>
+          </Animated.View>
+        ) : (
+          <View style={styles.guideContainer}>
+            <View style={styles.guideCard}>
+              <Text style={styles.guideTitle}>상담 가이드</Text>
+              <View style={styles.guideTipContainer}>
+                <View style={styles.guideTipBullet} />
+                <Text style={styles.guideTip}>
+                  상담 전 녹음 버튼을 눌러 고객의 말을 음성을 녹음하세요
+                </Text>
               </View>
-            ) : null}
-            {openaiContext ? (
-              <View style={styles.resultCard}>
-                <Text style={styles.textLabel}>AI 답변</Text>
-                <Text style={styles.resultText}>{openaiContext}</Text>
+              <View style={styles.guideTipContainer}>
+                <View style={styles.guideTipBullet} />
+                <Text style={styles.guideTip}>
+                  음성 인식 후 AI가 알맞은 답변을 알려드립니다.
+                </Text>
               </View>
-            ) : null}
-            <View style={styles.scrollBottomPadding} />
-          </ScrollView>
-        </Animated.View>
+              <View style={styles.guideTipContainer}>
+                <View style={styles.guideTipBullet} />
+                <Text style={styles.guideTip}>
+                  고객 정보를 바탕으로 맞춤형 상담 답변이 제공됩니다.
+                </Text>
+              </View>
+            </View>
+            {customerInfo && (
+              <View style={styles.guideCustomerInfoGuideCard}>
+                <Text style={styles.guideTitle}>고객 정보 요약</Text>
+                {customerInfo.salesField && (
+                  <Text style={styles.guideCustomerInfoGuideText}>
+                    <Text style={styles.guideCustomerInfoGuideLabel}>
+                      영업 분야:
+                    </Text>{' '}
+                    {customerInfo.salesField}
+                  </Text>
+                )}
+                {customerInfo.customerDetails?.age && (
+                  <Text style={styles.guideCustomerInfoGuideText}>
+                    <Text style={styles.guideCustomerInfoGuideLabel}>
+                      연령대:
+                    </Text>{' '}
+                    {customerInfo.customerDetails.age}
+                  </Text>
+                )}
+                {customerInfo.customerDetails?.purpose && (
+                  <Text style={styles.guideCustomerInfoGuideText}>
+                    <Text style={styles.guideCustomerInfoGuideLabel}>
+                      구매 목적:
+                    </Text>{' '}
+                    {customerInfo.customerDetails.purpose}
+                  </Text>
+                )}
+                {customerInfo.customerDetails?.budget && (
+                  <Text style={styles.guideCustomerInfoGuideText}>
+                    <Text style={styles.guideCustomerInfoGuideLabel}>
+                      예산:
+                    </Text>{' '}
+                    {customerInfo.customerDetails.budget}
+                  </Text>
+                )}
+                {customerInfo.customerDetails?.preference && (
+                  <Text style={styles.guideCustomerInfoGuideText}>
+                    <Text style={styles.guideCustomerInfoGuideLabel}>
+                      선호 스타일:
+                    </Text>{' '}
+                    {customerInfo.customerDetails.preference}
+                  </Text>
+                )}
+              </View>
+            )}
+          </View>
+        )}
         <View style={styles.bottomButtonsContainer}>
           <TouchableOpacity
             style={styles.newConsultationButton}
@@ -550,5 +621,70 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '500',
+  },
+  guideContainer: {
+    flex: 1,
+    paddingHorizontal: 20,
+    paddingTop: 10,
+  },
+  guideCard: {
+    backgroundColor: '#F8F8F8',
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  guideTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333333',
+    marginBottom: 16,
+  },
+  guideTipContainer: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 12,
+  },
+  guideTipBullet: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#3D3A3C',
+    marginTop: 6,
+    marginRight: 10,
+  },
+  guideTip: {
+    flex: 1,
+    fontSize: 15,
+    color: '#555555',
+    lineHeight: 22,
+  },
+  guideCustomerInfoGuideCard: {
+    backgroundColor: '#F8F8F8',
+    borderRadius: 12,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: '#E0E0E0',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  guideCustomerInfoGuideText: {
+    fontSize: 15,
+    color: '#444444',
+    marginBottom: 8,
+    lineHeight: 20,
+  },
+  guideCustomerInfoGuideLabel: {
+    fontWeight: '600',
+    color: '#333333',
   },
 });
