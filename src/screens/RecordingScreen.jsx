@@ -12,8 +12,8 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import { WS_SERVER } from '@env';
-import { RecordWaveButton } from '../components/RecordWaveButton';
 import ConsultationHeader from '../components/ConsultationHeader';
+import RecordControl from '../components/RecordControl';
 
 export default function RecordingScreen({ navigation, route }) {
   const customerInfo = route.params?.customerInfo;
@@ -23,7 +23,6 @@ export default function RecordingScreen({ navigation, route }) {
   const [whisperSttText, setWhisperSttText] = useState('');
   const [openaiContext, setOpenaiContext] = useState('');
   const [loading, setLoading] = useState(false);
-  const [recordDuration, setRecordDuration] = useState(0);
 
   const ws = useRef(null);
   const timerRef = useRef(null);
@@ -96,16 +95,6 @@ export default function RecordingScreen({ navigation, route }) {
   }, [customerInfo]);
 
   useEffect(() => {
-    if (isRecording) {
-      startRecordingTimer();
-    } else {
-      stopRecordingTimer();
-    }
-
-    return () => stopRecordingTimer();
-  }, [isRecording]);
-
-  useEffect(() => {
     if (whisperSttText || openaiContext) {
       Animated.parallel([
         Animated.timing(fadeMotion, {
@@ -122,24 +111,11 @@ export default function RecordingScreen({ navigation, route }) {
     }
   }, [whisperSttText, openaiContext]);
 
-  const startRecordingTimer = () => {
-    setRecordDuration(0);
-    timerRef.current = setInterval(() => {
-      setRecordDuration((prev) => prev + 1);
-    }, 1000);
-  };
-
   const stopRecordingTimer = () => {
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
-  };
-
-  const formatDuration = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
   const stopTtsSound = () => {
@@ -270,30 +246,10 @@ export default function RecordingScreen({ navigation, route }) {
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.recordingContainer}>
         <ConsultationHeader customerInfo={customerInfo} />
-        <View style={styles.recordControlContainer}>
-          <TouchableOpacity
-            onPress={handleRecordButton}
-            style={[
-              styles.recordButtonContainer,
-              isRecording ? styles.recordingActive : null,
-            ]}
-          >
-            <View style={styles.recordButton}>
-              <RecordWaveButton isRecording={isRecording} />
-              {isRecording && (
-                <View style={styles.recordingTimerStatus}>
-                  <View style={styles.recordingIndicator} />
-                  <Text style={styles.recordingTime}>
-                    {formatDuration(recordDuration)}
-                  </Text>
-                </View>
-              )}
-            </View>
-          </TouchableOpacity>
-          <Text style={styles.recordingInfoText}>
-            {isRecording ? '탭하여 녹음 중지' : '탭하여 녹음 시작'}
-          </Text>
-        </View>
+        <RecordControl
+          isRecording={isRecording}
+          onRecordPress={handleRecordButton}
+        />
         {loading && (
           <View style={styles.loadingContainer}>
             <ActivityIndicator size="large" color="#FFFFFF" />
@@ -426,32 +382,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     position: 'relative',
   },
-  recordControlContainer: {
-    paddingVertical: 30,
-    alignItems: 'center',
-  },
-  recordingTimerStatus: {
-    position: 'absolute',
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FF00001A',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 12,
-    zIndex: 10,
-  },
-  recordingIndicator: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: '#FF0000',
-    marginRight: 5,
-  },
-  recordingTime: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FF0000',
-  },
   recordButtonContainer: {
     width: 130,
     height: 130,
@@ -464,21 +394,6 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 3,
-  },
-  recordingActive: {
-    backgroundColor: '#FFF0F0',
-  },
-  recordButton: {
-    width: 120,
-    height: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
-    position: 'relative',
-  },
-  recordingInfoText: {
-    marginTop: 30,
-    fontSize: 14,
-    color: '#666666',
   },
   resultsContainer: {
     flex: 1,
