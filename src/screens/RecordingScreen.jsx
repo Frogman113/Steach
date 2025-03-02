@@ -237,7 +237,7 @@ export default function RecordingScreen({ navigation, route }) {
     navigation.navigate('Start');
   };
 
-  const handleNewSession = () => {
+  const handleNewConsultation = () => {
     stopTtsSound();
     setWhisperSttText('');
     setOpenaiContext('');
@@ -345,10 +345,10 @@ export default function RecordingScreen({ navigation, route }) {
         </Animated.View>
         <View style={styles.bottomButtonsContainer}>
           <TouchableOpacity
-            style={styles.newSessionButton}
-            onPress={handleNewSession}
+            style={styles.newConsultationButton}
+            onPress={handleNewConsultation}
           >
-            <Text style={styles.newSessionButtonText}>새 세션</Text>
+            <Text style={styles.newConsultationButtonText}>새 상담</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.endButton} onPress={handleEndButton}>
             <Text style={styles.endButtonText}>상담 종료</Text>
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#E9ECEF',
     justifyContent: 'space-between',
   },
-  newSessionButton: {
+  newConsultationButton: {
     flex: 1,
     backgroundColor: '#F8F9FA',
     paddingVertical: 12,
@@ -533,7 +533,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#CED4DA',
   },
-  newSessionButtonText: {
+  newConsultationButtonText: {
     color: '#495057',
     fontSize: 16,
     fontWeight: '500',
