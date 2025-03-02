@@ -285,14 +285,6 @@ export default function RecordingScreen({ navigation, route }) {
           <Text style={styles.customerInfo}>{headerCustomerCardInfo()}</Text>
         </View>
         <View style={styles.recordControlContainer}>
-          {isRecording && (
-            <View style={styles.recordingStatus}>
-              <View style={styles.recordingIndicator} />
-              <Text style={styles.recordingTime}>
-                {formatDuration(recordDuration)}
-              </Text>
-            </View>
-          )}
           <TouchableOpacity
             onPress={handleRecordButton}
             style={[
@@ -302,6 +294,14 @@ export default function RecordingScreen({ navigation, route }) {
           >
             <View style={styles.recordButton}>
               <RecordWaveButton isRecording={isRecording} />
+              {isRecording && (
+                <View style={styles.recordingTimerStatus}>
+                  <View style={styles.recordingIndicator} />
+                  <Text style={styles.recordingTime}>
+                    {formatDuration(recordDuration)}
+                  </Text>
+                </View>
+              )}
             </View>
           </TouchableOpacity>
           <Text style={styles.recordingInfoText}>
@@ -396,21 +396,22 @@ const styles = StyleSheet.create({
     paddingVertical: 30,
     alignItems: 'center',
   },
-  recordingStatus: {
+  recordingTimerStatus: {
+    position: 'absolute',
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 35,
-    paddingHorizontal: 15,
-    paddingVertical: 5,
     backgroundColor: '#FF00001A',
-    borderRadius: 20,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 12,
+    zIndex: 10,
   },
   recordingIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
     backgroundColor: '#FF0000',
-    marginRight: 8,
+    marginRight: 5,
   },
   recordingTime: {
     fontSize: 14,
@@ -438,6 +439,7 @@ const styles = StyleSheet.create({
     height: 120,
     justifyContent: 'center',
     alignItems: 'center',
+    position: 'relative',
   },
   recordingInfoText: {
     marginTop: 30,
