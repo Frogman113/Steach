@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   Animated,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import { WS_SERVER } from '@env';
 import { RecordWaveButton } from '../components/RecordWaveButton';
@@ -28,6 +29,15 @@ export default function RecordingScreen({ navigation, route }) {
   const scrollViewRef = useRef(null);
   const fadeMotion = useRef(new Animated.Value(0)).current;
   const slideMotion = useRef(new Animated.Value(50)).current;
+  const soundRef = useRef(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        stopTtsSound();
+      };
+    }, []),
+  );
 
   useEffect(() => {
     ws.current = new WebSocket(WS_SERVER);
@@ -73,6 +83,7 @@ export default function RecordingScreen({ navigation, route }) {
 
     return () => {
       stopRecordingTimer();
+      stopTtsSound();
 
       if (recording) {
         recording.stopAndUnloadAsync();
@@ -142,6 +153,18 @@ export default function RecordingScreen({ navigation, route }) {
     return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
+  const stopTtsSound = () => {
+    if (soundRef.current) {
+      try {
+        soundRef.current.stopAsync().catch(() => {});
+        soundRef.current.unloadAsync().catch(() => {});
+        soundRef.current = null;
+      } catch (error) {
+        alert('TTS 재생 중지 오류' + error.message);
+      }
+    }
+  };
+
   const startRecording = async () => {
     try {
       const permissionCheck = await Audio.requestPermissionsAsync();
@@ -177,7 +200,7 @@ export default function RecordingScreen({ navigation, route }) {
       setRecording(createRecording);
       setIsRecording(true);
     } catch (error) {
-      alert('녹음 시작 불가: ' + error.message);
+      alert('녹음 시작 불가' + error.message);
     }
   };
 
@@ -210,10 +233,12 @@ export default function RecordingScreen({ navigation, route }) {
   };
 
   const handleEndButton = () => {
+    stopTtsSound();
     navigation.navigate('Start');
   };
 
   const handleNewSession = () => {
+    stopTtsSound();
     setWhisperSttText('');
     setOpenaiContext('');
     fadeMotion.setValue(0);
@@ -240,12 +265,15 @@ export default function RecordingScreen({ navigation, route }) {
 
   const voicePlayResponse = async (base64Audio) => {
     try {
+      stopTtsSound();
       const voiceAudioUri = `data:audio/mp3;base64,${base64Audio}`;
       const voiceSound = new Audio.Sound();
+
       await voiceSound.loadAsync({ uri: voiceAudioUri });
+      soundRef.current = voiceSound;
       await voiceSound.playAsync();
     } catch (error) {
-      alert('음성 재생 오류');
+      alert('음성 재생 오류' + error.message);
     }
   };
 
@@ -254,7 +282,7 @@ export default function RecordingScreen({ navigation, route }) {
       <View style={styles.recordingContainer}>
         <View style={styles.headerContainer}>
           <Text style={styles.headerTitle}>영업 상담</Text>
-          <Text style={styles.customerInfo}>{getCustomerCardInfo()}</Text>
+          <Text style={styles.customerInfo}>{headerCustomerCardInfo()}</Text>
         </View>
         <View style={styles.recordControlContainer}>
           {isRecording && (
