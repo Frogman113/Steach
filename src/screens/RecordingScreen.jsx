@@ -2,7 +2,6 @@ import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   StyleSheet,
-  TouchableOpacity,
   Text,
   ActivityIndicator,
   ScrollView,
@@ -14,6 +13,7 @@ import { Audio } from 'expo-av';
 import { WS_SERVER } from '@env';
 import ConsultationHeader from '../components/ConsultationHeader';
 import RecordControl from '../components/RecordControl';
+import ConsultationBottom from '../components/ConsultationBottom';
 
 export default function RecordingScreen({ navigation, route }) {
   const customerInfo = route.params?.customerInfo;
@@ -356,17 +356,10 @@ export default function RecordingScreen({ navigation, route }) {
             )}
           </View>
         )}
-        <View style={styles.bottomButtonsContainer}>
-          <TouchableOpacity
-            style={styles.newConsultationButton}
-            onPress={handleNewConsultation}
-          >
-            <Text style={styles.newConsultationButtonText}>새 상담</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.endButton} onPress={handleEndButton}>
-            <Text style={styles.endButtonText}>상담 종료</Text>
-          </TouchableOpacity>
-        </View>
+        <ConsultationBottom
+          onNewConsultationPress={handleNewConsultation}
+          onEndPress={handleEndButton}
+        />
       </View>
     </SafeAreaView>
   );
@@ -458,47 +451,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000000',
     lineHeight: 24,
-  },
-  bottomButtonsContainer: {
-    flexDirection: 'row',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
-    justifyContent: 'space-between',
-  },
-  newConsultationButton: {
-    flex: 1,
-    backgroundColor: '#F8F9FA',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginRight: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#CED4DA',
-  },
-  newConsultationButtonText: {
-    color: '#495057',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  endButton: {
-    flex: 1,
-    backgroundColor: '#3D3A3C',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginLeft: 8,
-    alignItems: 'center',
-  },
-  endButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '500',
   },
   guideContainer: {
     flex: 1,
