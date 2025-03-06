@@ -14,6 +14,7 @@ import { WS_SERVER } from '@env';
 import ConsultationHeader from '../components/ConsultationHeader';
 import RecordControl from '../components/RecordControl';
 import ConsultationBottom from '../components/ConsultationBottom';
+import ConsultationGuide from '../components/ConsultationGuide';
 
 export default function RecordingScreen({ navigation, route }) {
   const customerInfo = route.params?.customerInfo;
@@ -252,7 +253,7 @@ export default function RecordingScreen({ navigation, route }) {
         />
         {loading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#FFFFFF" />
+            <ActivityIndicator size='large' color='#FFFFFF' />
             <Text style={styles.loadingText}>처리 중...</Text>
           </View>
         )}
@@ -287,74 +288,7 @@ export default function RecordingScreen({ navigation, route }) {
             </ScrollView>
           </Animated.View>
         ) : (
-          <View style={styles.guideContainer}>
-            <View style={styles.guideCard}>
-              <Text style={styles.guideTitle}>상담 가이드</Text>
-              <View style={styles.guideTipContainer}>
-                <View style={styles.guideTipBullet} />
-                <Text style={styles.guideTip}>
-                  상담 전 녹음 버튼을 눌러 고객의 말을 음성을 녹음하세요
-                </Text>
-              </View>
-              <View style={styles.guideTipContainer}>
-                <View style={styles.guideTipBullet} />
-                <Text style={styles.guideTip}>
-                  음성 인식 후 AI가 알맞은 답변을 알려드립니다.
-                </Text>
-              </View>
-              <View style={styles.guideTipContainer}>
-                <View style={styles.guideTipBullet} />
-                <Text style={styles.guideTip}>
-                  고객 정보를 바탕으로 맞춤형 상담 답변이 제공됩니다.
-                </Text>
-              </View>
-            </View>
-            {customerInfo && (
-              <View style={styles.guideCustomerInfoGuideCard}>
-                <Text style={styles.guideTitle}>고객 정보 요약</Text>
-                {customerInfo.salesField && (
-                  <Text style={styles.guideCustomerInfoGuideText}>
-                    <Text style={styles.guideCustomerInfoGuideLabel}>
-                      영업 분야:
-                    </Text>{' '}
-                    {customerInfo.salesField}
-                  </Text>
-                )}
-                {customerInfo.customerDetails?.age && (
-                  <Text style={styles.guideCustomerInfoGuideText}>
-                    <Text style={styles.guideCustomerInfoGuideLabel}>
-                      연령대:
-                    </Text>{' '}
-                    {customerInfo.customerDetails.age}
-                  </Text>
-                )}
-                {customerInfo.customerDetails?.purpose && (
-                  <Text style={styles.guideCustomerInfoGuideText}>
-                    <Text style={styles.guideCustomerInfoGuideLabel}>
-                      구매 목적:
-                    </Text>{' '}
-                    {customerInfo.customerDetails.purpose}
-                  </Text>
-                )}
-                {customerInfo.customerDetails?.budget && (
-                  <Text style={styles.guideCustomerInfoGuideText}>
-                    <Text style={styles.guideCustomerInfoGuideLabel}>
-                      예산:
-                    </Text>{' '}
-                    {customerInfo.customerDetails.budget}
-                  </Text>
-                )}
-                {customerInfo.customerDetails?.preference && (
-                  <Text style={styles.guideCustomerInfoGuideText}>
-                    <Text style={styles.guideCustomerInfoGuideLabel}>
-                      선호 스타일:
-                    </Text>{' '}
-                    {customerInfo.customerDetails.preference}
-                  </Text>
-                )}
-              </View>
-            )}
-          </View>
+          <ConsultationGuide customerInfo={customerInfo} />
         )}
         <ConsultationBottom
           onNewConsultationPress={handleNewConsultation}
@@ -451,70 +385,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000000',
     lineHeight: 24,
-  },
-  guideContainer: {
-    flex: 1,
-    paddingHorizontal: 20,
-    paddingTop: 10,
-  },
-  guideCard: {
-    backgroundColor: '#F8F8F8',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  guideTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333333',
-    marginBottom: 16,
-  },
-  guideTipContainer: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    marginBottom: 12,
-  },
-  guideTipBullet: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#3D3A3C',
-    marginTop: 6,
-    marginRight: 10,
-  },
-  guideTip: {
-    flex: 1,
-    fontSize: 15,
-    color: '#555555',
-    lineHeight: 22,
-  },
-  guideCustomerInfoGuideCard: {
-    backgroundColor: '#F8F8F8',
-    borderRadius: 12,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
-  },
-  guideCustomerInfoGuideText: {
-    fontSize: 15,
-    color: '#444444',
-    marginBottom: 8,
-    lineHeight: 20,
-  },
-  guideCustomerInfoGuideLabel: {
-    fontWeight: '600',
-    color: '#333333',
   },
 });
