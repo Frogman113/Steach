@@ -2,15 +2,19 @@ import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   StyleSheet,
-  TouchableOpacity,
   Text,
   ActivityIndicator,
   ScrollView,
   SafeAreaView,
+  Animated,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import { WS_SERVER } from '@env';
-import { RecordWaveButton } from '../components/RecordWaveButton';
+import ConsultationHeader from '../components/ConsultationHeader';
+import RecordControl from '../components/RecordControl';
+import ConsultationBottom from '../components/ConsultationBottom';
+import ConsultationGuide from '../components/ConsultationGuide';
 
 export default function RecordingScreen({ navigation, route }) {
   const customerInfo = route.params?.customerInfo;
@@ -20,11 +24,21 @@ export default function RecordingScreen({ navigation, route }) {
   const [whisperSttText, setWhisperSttText] = useState('');
   const [openaiContext, setOpenaiContext] = useState('');
   const [loading, setLoading] = useState(false);
-  const [recordDuration, setRecordDuration] = useState(0);
 
   const ws = useRef(null);
   const timerRef = useRef(null);
   const scrollViewRef = useRef(null);
+  const fadeMotion = useRef(new Animated.Value(0)).current;
+  const slideMotion = useRef(new Animated.Value(50)).current;
+  const soundRef = useRef(null);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      return () => {
+        stopTtsSound();
+      };
+    }, []),
+  );
 
   useEffect(() => {
     ws.current = new WebSocket(WS_SERVER);
@@ -70,6 +84,7 @@ export default function RecordingScreen({ navigation, route }) {
 
     return () => {
       stopRecordingTimer();
+      stopTtsSound();
 
       if (recording) {
         recording.stopAndUnloadAsync();
@@ -81,36 +96,21 @@ export default function RecordingScreen({ navigation, route }) {
   }, [customerInfo]);
 
   useEffect(() => {
-    if (isRecording) {
-      startRecordingTimer();
-    } else {
-      stopRecordingTimer();
+    if (whisperSttText || openaiContext) {
+      Animated.parallel([
+        Animated.timing(fadeMotion, {
+          toValue: 1,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideMotion, {
+          toValue: 0,
+          duration: 500,
+          useNativeDriver: true,
+        }),
+      ]).start();
     }
-
-    return () => stopRecordingTimer();
-  }, [isRecording]);
-
-  const getCustomerSummary = () => {
-    if (!customerInfo) {
-      return '고객 정보 없음';
-    }
-    const details = [
-      customerInfo.salesField,
-      customerInfo.customerDetails?.age,
-      customerInfo.customerDetails?.purpose,
-      customerInfo.customerDetails?.budget,
-      customerInfo.customerDetails?.preference,
-    ].filter(Boolean);
-
-    return details.length > 0 ? details.join(' / ') : '고객 정보 없음';
-  };
-
-  const startRecordingTimer = () => {
-    setRecordDuration(0);
-    timerRef.current = setInterval(() => {
-      setRecordDuration((prev) => prev + 1);
-    }, 1000);
-  };
+  }, [whisperSttText, openaiContext]);
 
   const stopRecordingTimer = () => {
     if (timerRef.current) {
@@ -119,10 +119,16 @@ export default function RecordingScreen({ navigation, route }) {
     }
   };
 
-  const formatDuration = (seconds) => {
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+  const stopTtsSound = () => {
+    if (soundRef.current) {
+      try {
+        soundRef.current.stopAsync().catch(() => {});
+        soundRef.current.unloadAsync().catch(() => {});
+        soundRef.current = null;
+      } catch (error) {
+        alert('TTS 재생 중지 오류' + error.message);
+      }
+    }
   };
 
   const startRecording = async () => {
@@ -160,7 +166,7 @@ export default function RecordingScreen({ navigation, route }) {
       setRecording(createRecording);
       setIsRecording(true);
     } catch (error) {
-      alert('녹음 시작 불가: ' + error.message);
+      alert('녹음 시작 불가' + error.message);
     }
   };
 
@@ -193,12 +199,16 @@ export default function RecordingScreen({ navigation, route }) {
   };
 
   const handleEndButton = () => {
+    stopTtsSound();
     navigation.navigate('Start');
   };
 
-  const handleNewSession = () => {
+  const handleNewConsultation = () => {
+    stopTtsSound();
     setWhisperSttText('');
     setOpenaiContext('');
+    fadeMotion.setValue(0);
+    slideMotion.setValue(50);
   };
 
   const convertSpeechToText = async (audioUri) => {
@@ -221,82 +231,69 @@ export default function RecordingScreen({ navigation, route }) {
 
   const voicePlayResponse = async (base64Audio) => {
     try {
+      stopTtsSound();
       const voiceAudioUri = `data:audio/mp3;base64,${base64Audio}`;
       const voiceSound = new Audio.Sound();
+
       await voiceSound.loadAsync({ uri: voiceAudioUri });
+      soundRef.current = voiceSound;
       await voiceSound.playAsync();
     } catch (error) {
-      alert('음성 재생 오류');
+      alert('음성 재생 오류' + error.message);
     }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.recordingContainer}>
-        <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>영업 상담</Text>
-          <Text style={styles.customerInfo}>{getCustomerSummary()}</Text>
-        </View>
-        <View style={styles.recordControlContainer}>
-          {isRecording && (
-            <View style={styles.recordingStatus}>
-              <View style={styles.recordingIndicator} />
-              <Text style={styles.recordingTime}>
-                {formatDuration(recordDuration)}
-              </Text>
-            </View>
-          )}
-          <TouchableOpacity
-            onPress={handleRecordButton}
-            style={[
-              styles.recordButtonContainer,
-              isRecording ? styles.recordingActive : null,
-            ]}
-          >
-            <View style={styles.recordButton}>
-              <RecordWaveButton isRecording={isRecording} />
-            </View>
-          </TouchableOpacity>
-          <Text style={styles.recordingInfoText}>
-            {isRecording ? '탭하여 녹음 중지' : '탭하여 녹음 시작'}
-          </Text>
-        </View>
+        <ConsultationHeader customerInfo={customerInfo} />
+        <RecordControl
+          isRecording={isRecording}
+          onRecordPress={handleRecordButton}
+        />
         {loading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#FFFFFF" />
+            <ActivityIndicator size='large' color='#FFFFFF' />
             <Text style={styles.loadingText}>처리 중...</Text>
           </View>
         )}
-        <ScrollView
-          ref={scrollViewRef}
-          style={styles.scrollContainer}
-          contentContainerStyle={styles.scrollContent}
-        >
-          {whisperSttText ? (
-            <View style={styles.resultCard}>
-              <Text style={styles.textLabel}>음성 인식 결과</Text>
-              <Text style={styles.resultText}>{whisperSttText}</Text>
-            </View>
-          ) : null}
-          {openaiContext ? (
-            <View style={styles.resultCard}>
-              <Text style={styles.textLabel}>AI 답변</Text>
-              <Text style={styles.resultText}>{openaiContext}</Text>
-            </View>
-          ) : null}
-          <View style={styles.scrollBottomPadding} />
-        </ScrollView>
-        <View style={styles.bottomButtonsContainer}>
-          <TouchableOpacity
-            style={styles.newSessionButton}
-            onPress={handleNewSession}
+        {whisperSttText || openaiContext ? (
+          <Animated.View
+            style={[
+              styles.resultsContainer,
+              {
+                opacity: fadeMotion,
+                transform: [{ translateY: slideMotion }],
+              },
+            ]}
           >
-            <Text style={styles.newSessionButtonText}>새 세션</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.endButton} onPress={handleEndButton}>
-            <Text style={styles.endButtonText}>상담 종료</Text>
-          </TouchableOpacity>
-        </View>
+            <ScrollView
+              ref={scrollViewRef}
+              style={styles.scrollContainer}
+              contentContainerStyle={styles.scrollContent}
+            >
+              {whisperSttText ? (
+                <View style={styles.resultCard}>
+                  <Text style={styles.textLabel}>음성 인식 결과</Text>
+                  <Text style={styles.resultText}>{whisperSttText}</Text>
+                </View>
+              ) : null}
+              {openaiContext ? (
+                <View style={styles.resultCard}>
+                  <Text style={styles.textLabel}>AI 답변</Text>
+                  <Text style={styles.resultText}>{openaiContext}</Text>
+                </View>
+              ) : null}
+              <View style={styles.scrollBottomPadding} />
+            </ScrollView>
+          </Animated.View>
+        ) : (
+          <ConsultationGuide customerInfo={customerInfo} />
+        )}
+        <ConsultationBottom
+          onNewConsultationPress={handleNewConsultation}
+          onEndPress={handleEndButton}
+        />
       </View>
     </SafeAreaView>
   );
@@ -312,54 +309,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     position: 'relative',
   },
-  headerContainer: {
-    backgroundColor: '#3D3A3C',
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 4,
-    alignItems: 'center',
-  },
-  headerTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    textAlign: 'center',
-    marginBottom: 4,
-  },
-  customerInfo: {
-    fontSize: 14,
-    color: '#E0E0E0',
-    textAlign: 'center',
-  },
-  recordControlContainer: {
-    paddingVertical: 30,
-    alignItems: 'center',
-  },
-  recordingStatus: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 35,
-    paddingHorizontal: 15,
-    paddingVertical: 5,
-    backgroundColor: '#FF00001A',
-    borderRadius: 20,
-  },
-  recordingIndicator: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    backgroundColor: '#FF0000',
-    marginRight: 8,
-  },
-  recordingTime: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#FF0000',
-  },
   recordButtonContainer: {
     width: 130,
     height: 130,
@@ -373,19 +322,17 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
     elevation: 3,
   },
-  recordingActive: {
-    backgroundColor: '#FFF0F0',
-  },
-  recordButton: {
-    width: 120,
-    height: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  recordingInfoText: {
-    marginTop: 30,
-    fontSize: 14,
-    color: '#666666',
+  resultsContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    marginHorizontal: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 3,
   },
   loadingContainer: {
     position: 'absolute',
@@ -438,46 +385,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#000000',
     lineHeight: 24,
-  },
-  bottomButtonsContainer: {
-    flexDirection: 'row',
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: '#E9ECEF',
-    justifyContent: 'space-between',
-  },
-  newSessionButton: {
-    flex: 1,
-    backgroundColor: '#F8F9FA',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginRight: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#CED4DA',
-  },
-  newSessionButtonText: {
-    color: '#495057',
-    fontSize: 16,
-    fontWeight: '500',
-  },
-  endButton: {
-    flex: 1,
-    backgroundColor: '#3D3A3C',
-    paddingVertical: 12,
-    borderRadius: 8,
-    marginLeft: 8,
-    alignItems: 'center',
-  },
-  endButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '500',
   },
 });
